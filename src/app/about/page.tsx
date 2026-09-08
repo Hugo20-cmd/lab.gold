@@ -354,7 +354,7 @@ export default function AboutPage() {
               <span>ACERVO HISTÓRICO AUDIOVISUAL</span>
             </div>
             <h2 className="text-3xl font-black text-white tracking-wide uppercase">
-              ARQUIVO <span className="gold-gradient-text">PENNAMC</span>
+              ARQUIVO <span className="gold-gradient-text">HISTÓRICO</span>
             </h2>
             <p className="text-xs text-zinc-400 mt-1 max-w-xl">
               Documentos sonoros e registros em áudio/vídeo da primeira fase do artista com o Curta Metragem e produções autorais.
