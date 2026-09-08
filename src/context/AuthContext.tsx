@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 export interface UserProfile {
   id: string;
   name: string;
+  nickname?: string;
   email: string;
   phone: string;
   createdAt: string;
@@ -13,7 +14,7 @@ export interface UserProfile {
 interface AuthContextType {
   user: UserProfile | null;
   isLoggedIn: boolean;
-  registerUser: (data: { name: string; email: string; phone: string }) => UserProfile;
+  registerUser: (data: { name: string; nickname?: string; email: string; phone: string }) => UserProfile;
   loginUser: (emailOrPhone: string) => boolean;
   logout: () => void;
 }
@@ -33,10 +34,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {}
   }, []);
 
-  const registerUser = (data: { name: string; email: string; phone: string }) => {
+  const registerUser = (data: { name: string; nickname?: string; email: string; phone: string }) => {
     const newUser: UserProfile = {
       id: `user-${Date.now()}`,
       name: data.name,
+      nickname: data.nickname,
       email: data.email,
       phone: data.phone,
       createdAt: new Date().toISOString()
@@ -50,6 +52,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const existingUsers = JSON.parse(localStorage.getItem('labgold_users_db') || '[]');
       existingUsers.push(newUser);
       localStorage.setItem('labgold_users_db', JSON.stringify(existingUsers));
+
+      // Call registration API endpoint for email sending & lead persistence
+      fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser)
+      }).catch(() => {});
     } catch (e) {}
 
     return newUser;
