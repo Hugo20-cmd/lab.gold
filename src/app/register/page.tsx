@@ -3,9 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, Mail, Phone, Lock, CheckCircle2, Disc, ArrowRight, ShieldCheck } from 'lucide-react';
+import { User, Mail, Phone, Lock, CheckCircle2, Disc, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { BRAND_NAME } from '../../data/mockData';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,6 +12,7 @@ export default function RegisterPage() {
 
   const [formData, setFormData] = useState({
     name: '',
+    nickname: '',
     email: '',
     phone: '',
     password: ''
@@ -26,6 +26,7 @@ export default function RegisterPage() {
 
     registerUser({
       name: formData.name,
+      nickname: formData.nickname,
       email: formData.email,
       phone: formData.phone
     });
@@ -33,7 +34,7 @@ export default function RegisterPage() {
     setRegistered(true);
     setTimeout(() => {
       router.push('/beats');
-    }, 1500);
+    }, 2000);
   };
 
   return (
@@ -64,7 +65,10 @@ export default function RegisterPage() {
             </div>
             <h3 className="text-2xl font-black text-white uppercase">CADASTRO REALIZADO COM SUCESSO!</h3>
             <p className="text-xs text-zinc-300">
-              Seus dados foram salvos. Redirecionando para o catálogo de beats...
+              Enviamos a confirmação do seu perfil para <strong className="text-amber-400">{formData.email}</strong>.
+            </p>
+            <p className="text-[11px] text-zinc-500 font-mono">
+              Redirecionando para o catálogo de beats...
             </p>
           </div>
         ) : (
@@ -73,14 +77,28 @@ export default function RegisterPage() {
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5" />
-                <span>NOME COMPLETO OU ARTÍSTICO *</span>
+                <span>NOME COMPLETO *</span>
               </label>
               <input
                 type="text"
                 required
-                placeholder="Ex: MC Vanguarda / Gabriel Silva"
+                placeholder="Ex: Gabriel Silva"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-500 outline-none focus:border-amber-500/60"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>APELIDO ARTÍSTICO / NOME DO CANAL</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: MC Vanguarda / OG Vanguarda"
+                value={formData.nickname}
+                onChange={e => setFormData({ ...formData, nickname: e.target.value })}
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-500 outline-none focus:border-amber-500/60"
               />
             </div>
@@ -132,7 +150,7 @@ export default function RegisterPage() {
 
             <div className="p-3 bg-zinc-900/60 rounded-xl border border-zinc-800 text-[10px] text-zinc-400 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>Seus dados cadastrais serão anexados à nota fiscal enviada no WhatsApp.</span>
+              <span>Seus dados cadastrais serão armazenados e anexados à nota fiscal enviada no WhatsApp.</span>
             </div>
 
             <button
