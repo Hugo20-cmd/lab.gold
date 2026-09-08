@@ -133,13 +133,21 @@ export const Navbar: React.FC = () => {
               <span className="max-w-[100px] truncate">{user.name}</span>
             </Link>
           ) : (
-            <Link
-              href="/register"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg gold-gradient-bg text-black font-extrabold text-xs hover:brightness-110 transition shadow-md"
-            >
-              <User className="w-3.5 h-3.5 fill-black" />
-              <span>CADASTRO</span>
-            </Link>
+            <div className="hidden sm:flex items-center gap-2">
+              <Link
+                href="/login"
+                className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-amber-500/40 text-zinc-300 hover:text-white font-extrabold text-xs transition"
+              >
+                ENTRAR
+              </Link>
+              <Link
+                href="/register"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg gold-gradient-bg text-black font-extrabold text-xs hover:brightness-110 transition shadow-md"
+              >
+                <User className="w-3.5 h-3.5 fill-black" />
+                <span>CADASTRO</span>
+              </Link>
+            </div>
           )}
 
           {/* Mobile Menu Button */}
@@ -169,15 +177,7 @@ export const Navbar: React.FC = () => {
               {link.name}
             </Link>
           ))}
-          <div className="pt-2 border-t border-zinc-800 flex items-center justify-between">
-            <Link
-              href="/contact"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-xs font-bold text-zinc-400 hover:text-amber-400"
-            >
-              CONTATO & BOOKING
-            </Link>
-            
+          <div className="pt-3 border-t border-zinc-800 flex items-center justify-between gap-2">
             {user ? (
               <Link
                 href="/profile"
@@ -188,14 +188,23 @@ export const Navbar: React.FC = () => {
                 <span>{user.name}</span>
               </Link>
             ) : (
-              <Link
-                href="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-1.5 text-xs font-extrabold text-black gold-gradient-bg px-3 py-1.5 rounded-md"
-              >
-                <User className="w-3.5 h-3.5 fill-black" />
-                <span>CADASTRAR-SE</span>
-              </Link>
+              <div className="flex items-center gap-2 w-full justify-between">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-xs font-extrabold text-zinc-300 bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg"
+                >
+                  ENTRAR
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-1.5 text-xs font-extrabold text-black gold-gradient-bg px-4 py-2 rounded-lg"
+                >
+                  <User className="w-3.5 h-3.5 fill-black" />
+                  <span>CADASTRO</span>
+                </Link>
+              </div>
             )}
           </div>
         </div>
