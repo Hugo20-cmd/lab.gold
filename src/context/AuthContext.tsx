@@ -8,14 +8,20 @@ export interface UserProfile {
   nickname?: string;
   email: string;
   phone: string;
+  password?: string;
   createdAt: string;
+}
+
+export interface LoginResult {
+  success: boolean;
+  error?: string;
 }
 
 interface AuthContextType {
   user: UserProfile | null;
   isLoggedIn: boolean;
-  registerUser: (data: { name: string; nickname?: string; email: string; phone: string }) => UserProfile;
-  loginUser: (emailOrPhone: string) => boolean;
+  registerUser: (data: { name: string; nickname?: string; email: string; phone: string; password?: string }) => UserProfile;
+  loginUser: (emailOrPhone: string, password?: string) => LoginResult;
   logout: () => void;
 }
 
@@ -34,13 +40,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {}
   }, []);
 
-  const registerUser = (data: { name: string; nickname?: string; email: string; phone: string }) => {
+  const registerUser = (data: { name: string; nickname?: string; email: string; phone: string; password?: string }) => {
     const newUser: UserProfile = {
       id: `user-${Date.now()}`,
       name: data.name,
       nickname: data.nickname,
       email: data.email,
       phone: data.phone,
+      password: data.password,
       createdAt: new Date().toISOString()
     };
 
@@ -49,8 +56,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('labgold_active_user', JSON.stringify(newUser));
 
       // Save to local user registry DB
-      const existingUsers = JSON.parse(localStorage.getItem('labgold_users_db') || '[]');
-      existingUsers.push(newUser);
+      const existingUsers: UserProfile[] = JSON.parse(localStorage.getItem('labgold_users_db') || '[]');
+      
+      // Update existing user or push new
+      const existingIdx = existingUsers.findIndex(u => u.email.toLowerCase() === data.email.toLowerCase());
+      if (existingIdx >= 0) {
+        existingUsers[existingIdx] = newUser;
+      } else {
+        existingUsers.push(newUser);
+      }
       localStorage.setItem('labgold_users_db', JSON.stringify(existingUsers));
 
       // Call registration API endpoint for email sending & lead persistence
@@ -64,20 +78,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return newUser;
   };
 
-  const loginUser = (emailOrPhone: string) => {
+  const loginUser = (emailOrPhone: string, passwordInput?: string): LoginResult => {
     try {
       const existingUsers: UserProfile[] = JSON.parse(localStorage.getItem('labgold_users_db') || '[]');
+      const cleanSearch = emailOrPhone.trim().toLowerCase();
+      
       const found = existingUsers.find(
-        u => u.email.toLowerCase() === emailOrPhone.toLowerCase() || u.phone.includes(emailOrPhone)
+        u => u.email.toLowerCase() === cleanSearch || u.phone.replace(/\D/g, '').includes(cleanSearch.replace(/\D/g, ''))
       );
 
-      if (found) {
-        setUser(found);
-        localStorage.setItem('labgold_active_user', JSON.stringify(found));
-        return true;
+      if (!found) {
+        return {
+          success: false,
+          error: 'Conta não encontrada com este e-mail ou WhatsApp. Crie sua conta primeiro!'
+        };
       }
-    } catch (e) {}
-    return false;
+
+      // Check password equality strictly if user has a password registered
+      if (found.password && passwordInput && found.password !== passwordInput) {
+        return {
+          success: false,
+          error: 'Senha incorreta! Verifique a senha digitada e tente novamente.'
+        };
+      }
+
+      setUser(found);
+      localStorage.setItem('labgold_active_user', JSON.stringify(found));
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: 'Erro ao efetuar login. Tente novamente.' };
+    }
   };
 
   const logout = () => {
