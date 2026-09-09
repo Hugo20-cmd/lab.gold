@@ -55,7 +55,10 @@ export const GlobalAudioPlayer: React.FC = () => {
   // 1. Minimized Floating Widget on Bottom Right (completely unobtrusive)
   if (minimized) {
     return (
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#0a0a0d]/95 backdrop-blur-xl border border-amber-500/40 p-2 sm:p-2.5 rounded-full shadow-[0_10px_35px_rgba(0,0,0,0.9)] animate-fade-in hover:border-amber-400 transition-all">
+      <div 
+        onContextMenu={(e) => e.preventDefault()}
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#0a0a0d]/95 backdrop-blur-xl border border-amber-500/40 p-2 sm:p-2.5 rounded-full shadow-[0_10px_35px_rgba(0,0,0,0.9)] animate-fade-in hover:border-amber-400 transition-all"
+      >
         <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-amber-500/40">
           <img
             src={currentTrack.coverUrl}
@@ -105,7 +108,7 @@ export const GlobalAudioPlayer: React.FC = () => {
 
   // 2. Full Bottom Docked Player
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300">
+    <div onContextMenu={(e) => e.preventDefault()} className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300">
       
       {/* Top Header Pill Controls */}
       <div className="flex justify-center -mb-[1px]">
