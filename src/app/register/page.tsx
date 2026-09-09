@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { registerUser } = useAuth();
+  const { registerUser, loginWithGoogle } = useAuth();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -19,38 +19,33 @@ export default function RegisterPage() {
   });
 
   const [registered, setRegistered] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.phone) return;
+    setError('');
+    setLoading(true);
 
-    registerUser({
-      name: formData.name,
-      nickname: formData.nickname,
-      email: formData.email,
-      phone: formData.phone,
-      password: formData.password
-    });
-
-    setRegistered(true);
-    setTimeout(() => {
-      router.push('/beats');
-    }, 2000);
+    const res = await registerUser(formData);
+    
+    if (res?.success) {
+      setRegistered(true);
+      setTimeout(() => {
+        router.push('/beats');
+      }, 3000);
+    } else {
+      setError(res?.error || 'Erro ao efetuar cadastro.');
+      setLoading(false);
+    }
   };
 
-  const handleGoogleRegister = () => {
-    const simulatedGoogleUser = {
-      name: 'Cliente Google',
-      nickname: 'MC Google',
-      email: 'cliente.google@gmail.com',
-      phone: '(22) 99999-0000'
-    };
-
-    registerUser(simulatedGoogleUser);
-    setRegistered(true);
-    setTimeout(() => {
-      router.push('/beats');
-    }, 1500);
+  const handleGoogleRegister = async () => {
+    try {
+      await loginWithGoogle();
+    } catch (e: any) {
+      setError('Erro ao iniciar cadastro com o Google.');
+    }
   };
 
   return (
@@ -89,9 +84,16 @@ export default function RegisterPage() {
           </div>
         ) : (
           <>
+            {error && (
+              <p className="text-xs text-red-400 font-bold bg-red-950/40 p-3 rounded-xl border border-red-500/30">
+                {error}
+              </p>
+            )}
+
             {/* Google Fast Register Button */}
             <button
               onClick={handleGoogleRegister}
+              type="button"
               className="w-full bg-white hover:bg-zinc-100 text-black font-extrabold text-xs py-3.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-3 tracking-wider uppercase border border-zinc-200"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
