@@ -86,22 +86,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCurrentTrack(item);
     setIsLoading(true);
 
-    let secureUrl = item.audioUrl;
-
-    // Proteção de Áudio (Blob Fetching)
-    try {
-      if (blobCache.current.has(item.id)) {
-        secureUrl = blobCache.current.get(item.id)!;
-      } else {
-        // Baixa o arquivo em memória para ofuscar a URL real
-        const response = await fetch(item.audioUrl);
-        const blob = await response.blob();
-        secureUrl = URL.createObjectURL(blob);
-        blobCache.current.set(item.id, secureUrl);
-      }
-    } catch (e) {
-      console.error("Falha ao proteger stream do áudio, caindo para URL padrão", e);
-    }
+    const secureUrl = item.audioUrl;
 
     audioRef.current.src = secureUrl;
     audioRef.current.currentTime = 0;
