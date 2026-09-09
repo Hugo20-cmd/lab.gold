@@ -466,7 +466,7 @@ export const MOCK_SAMPLES: Sample[] = [
     category: 'Melodies',
     bpm: 120,
     key: 'E Min',
-    audioUrl: 'https://aqjppvztbspsxwesmcmk.supabase.co/storage/v1/object/public/beats%20+%20Starters/starters/@OriginalPenna%20(stacks)%20120bpm%20(E%20MINOR).wav.wav',
+    audioUrl: '/audio/starters/starter-stacks-120bpm-e-minor.wav',
     isFree: true,
     price: 0,
     packName: 'STARTER PACK VOL. 01'
@@ -478,7 +478,7 @@ export const MOCK_SAMPLES: Sample[] = [
     category: 'Melodies',
     bpm: 120,
     key: 'E Min',
-    audioUrl: 'https://aqjppvztbspsxwesmcmk.supabase.co/storage/v1/object/public/beats%20+%20Starters/starters/@OriginalPenna%20PIANO%20UNDERWATER%20DREAM%20%20(E%20MINOR).wav',
+    audioUrl: '/audio/starters/starter-piano-underwater-dream-e-minor.wav',
     isFree: false,
     price: 100.00,
     priceClosed: 100.00,
@@ -494,7 +494,7 @@ export const MOCK_SAMPLES: Sample[] = [
     category: 'Melodies',
     bpm: 110,
     key: 'B Min',
-    audioUrl: 'https://aqjppvztbspsxwesmcmk.supabase.co/storage/v1/object/public/beats%20+%20Starters/starters/@OriginalPenna.%20AUGMENTED%20G.PIANO%20110bpm%20(B%20Minor)%20ou%20(Fb%20Minor).wav',
+    audioUrl: '/audio/starters/starter-augmented-gpiano-110bpm-b-minor.wav',
     isFree: true,
     price: 0,
     packName: 'STARTER PACK VOL. 01'
@@ -506,7 +506,7 @@ export const MOCK_SAMPLES: Sample[] = [
     category: 'Loops',
     bpm: 125,
     key: 'C Min',
-    audioUrl: 'https://aqjppvztbspsxwesmcmk.supabase.co/storage/v1/object/public/beats%20+%20Starters/starters/@OriginalPenna.%20KONTAKT%2001%20125bpm%20(C%20Minor).wav',
+    audioUrl: '/audio/starters/starter-kontakt-01-125bpm-c-minor.wav',
     isFree: true,
     price: 0,
     packName: 'STARTER PACK VOL. 01'
@@ -518,7 +518,7 @@ export const MOCK_SAMPLES: Sample[] = [
     category: 'Melodies',
     bpm: 80,
     key: 'Eb Maj',
-    audioUrl: 'https://aqjppvztbspsxwesmcmk.supabase.co/storage/v1/object/public/beats%20+%20Starters/starters/@OriginalPenna.%20forte%2080bpm%20(Eb%20major).wav',
+    audioUrl: '/audio/starters/starter-forte-80bpm-eb-major.wav',
     isFree: true,
     price: 0,
     packName: 'STARTER PACK VOL. 01'
@@ -536,7 +536,7 @@ export const MOCK_SAMPLE_PACKS: SamplePack[] = [
     price: 0,
     isFree: true,
     description: 'Pacote oficial de Starters e Melodias produzidas por @originalpenna. Arquivos WAV sem perda em 24-bit prontos para arrasto direto na sua DAW.',
-    previewAudioUrl: 'https://aqjppvztbspsxwesmcmk.supabase.co/storage/v1/object/public/beats%20+%20Starters/starters/@OriginalPenna%20(stacks)%20120bpm%20(E%20MINOR).wav.wav'
+    previewAudioUrl: '/audio/starters/starter-stacks-120bpm-e-minor.wav'
   }
 ];
 
