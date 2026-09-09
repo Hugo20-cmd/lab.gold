@@ -8,35 +8,33 @@ import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { loginUser, registerUser } = useAuth();
+  const { loginUser, loginWithGoogle } = useAuth();
 
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    const res = loginUser(emailOrPhone, password);
+    const res = await loginUser(emailOrPhone, password);
     if (res.success) {
       router.push('/profile');
     } else {
       setError(res.error || 'Erro ao efetuar login. Verifique seus dados.');
+      setLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Google OAuth integration simulation / Supabase Auth trigger
-    const simulatedGoogleUser = {
-      name: 'Cliente Google',
-      nickname: 'MC Google',
-      email: 'cliente.google@gmail.com',
-      phone: '(22) 99999-0000'
-    };
-
-    registerUser(simulatedGoogleUser);
-    router.push('/beats');
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+    } catch (e: any) {
+      setError('Erro ao iniciar login com o Google.');
+    }
   };
 
   return (
@@ -63,6 +61,7 @@ export default function LoginPage() {
         {/* Google OAuth Login Button */}
         <button
           onClick={handleGoogleLogin}
+          type="button"
           className="w-full bg-white hover:bg-zinc-100 text-black font-extrabold text-xs py-3.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-3 tracking-wider uppercase border border-zinc-200"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -85,12 +84,12 @@ export default function LoginPage() {
           <div className="space-y-1">
             <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" />
-              <span>E-MAIL OU WHATSAPP</span>
+              <span>E-MAIL</span>
             </label>
             <input
-              type="text"
+              type="email"
               required
-              placeholder="seuemail@gmail.com ou (22) 99887-6655"
+              placeholder="seuemail@gmail.com"
               value={emailOrPhone}
               onChange={e => setEmailOrPhone(e.target.value)}
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-500 outline-none focus:border-amber-500/60"
@@ -120,9 +119,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full gold-gradient-bg text-black font-extrabold text-sm py-4 rounded-xl shadow-xl hover:brightness-110 transition flex items-center justify-center gap-2 uppercase tracking-wider mt-2"
+            disabled={loading}
+            className="w-full gold-gradient-bg text-black font-extrabold text-sm py-4 rounded-xl shadow-xl hover:brightness-110 transition flex items-center justify-center gap-2 uppercase tracking-wider mt-2 disabled:opacity-50"
           >
-            <span>ENTRAR NA CONTA</span>
+            <span>{loading ? 'ENTRANDO...' : 'ENTRAR NA CONTA'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
 
