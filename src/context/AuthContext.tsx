@@ -1,6 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 export interface UserProfile {
   id: string;
@@ -8,7 +10,6 @@ export interface UserProfile {
   nickname?: string;
   email: string;
   phone: string;
-  password?: string;
   createdAt: string;
 }
 
@@ -20,101 +21,107 @@ export interface LoginResult {
 interface AuthContextType {
   user: UserProfile | null;
   isLoggedIn: boolean;
-  registerUser: (data: { name: string; nickname?: string; email: string; phone: string; password?: string }) => UserProfile;
-  loginUser: (emailOrPhone: string, password?: string) => LoginResult;
-  logout: () => void;
+  loading: boolean;
+  registerUser: (data: { name: string; nickname?: string; email: string; phone: string; password?: string }) => Promise<LoginResult>;
+  loginUser: (email: string, password?: string) => Promise<LoginResult>;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load active user from localStorage on mount
+  // Parse Supabase User into our UserProfile
+  const mapSupabaseUser = (sbUser: User | null): UserProfile | null => {
+    if (!sbUser) return null;
+    return {
+      id: sbUser.id,
+      email: sbUser.email || '',
+      name: sbUser.user_metadata?.name || 'Usuário',
+      nickname: sbUser.user_metadata?.nickname || '',
+      phone: sbUser.user_metadata?.phone || '',
+      createdAt: sbUser.created_at
+    };
+  };
+
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem('labgold_active_user');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
-    } catch (e) {}
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(mapSupabaseUser(session?.user ?? null));
+      setLoading(false);
+    });
+
+    // Listen for changes on auth state (sign in, sign out, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(mapSupabaseUser(session?.user ?? null));
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const registerUser = (data: { name: string; nickname?: string; email: string; phone: string; password?: string }) => {
-    const newUser: UserProfile = {
-      id: `user-${Date.now()}`,
-      name: data.name,
-      nickname: data.nickname,
-      email: data.email,
-      phone: data.phone,
-      password: data.password,
-      createdAt: new Date().toISOString()
-    };
-
-    setUser(newUser);
+  const registerUser = async (data: { name: string; nickname?: string; email: string; phone: string; password?: string }): Promise<LoginResult> => {
     try {
-      localStorage.setItem('labgold_active_user', JSON.stringify(newUser));
+      const { data: authData, error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password || 'senha123456', // Se não tiver senha (não deveria acontecer), bota um padrão
+        options: {
+          data: {
+            name: data.name,
+            nickname: data.nickname || '',
+            phone: data.phone || ''
+          }
+        }
+      });
 
-      // Save to local user registry DB
-      const existingUsers: UserProfile[] = JSON.parse(localStorage.getItem('labgold_users_db') || '[]');
-      
-      // Update existing user or push new
-      const existingIdx = existingUsers.findIndex(u => u.email.toLowerCase() === data.email.toLowerCase());
-      if (existingIdx >= 0) {
-        existingUsers[existingIdx] = newUser;
-      } else {
-        existingUsers.push(newUser);
+      if (error) {
+        return { success: false, error: error.message };
       }
-      localStorage.setItem('labgold_users_db', JSON.stringify(existingUsers));
 
-      // Call registration API endpoint for email sending & lead persistence
+      // Envia o e-mail pela API do Resend no background
       fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newUser)
+        body: JSON.stringify(data)
       }).catch(() => {});
-    } catch (e) {}
 
-    return newUser;
-  };
-
-  const loginUser = (emailOrPhone: string, passwordInput?: string): LoginResult => {
-    try {
-      const existingUsers: UserProfile[] = JSON.parse(localStorage.getItem('labgold_users_db') || '[]');
-      const cleanSearch = emailOrPhone.trim().toLowerCase();
-      
-      const found = existingUsers.find(
-        u => u.email.toLowerCase() === cleanSearch || u.phone.replace(/\D/g, '').includes(cleanSearch.replace(/\D/g, ''))
-      );
-
-      if (!found) {
-        return {
-          success: false,
-          error: 'Conta não encontrada com este e-mail ou WhatsApp. Crie sua conta primeiro!'
-        };
-      }
-
-      // Check password equality strictly if user has a password registered
-      if (found.password && passwordInput && found.password !== passwordInput) {
-        return {
-          success: false,
-          error: 'Senha incorreta! Verifique a senha digitada e tente novamente.'
-        };
-      }
-
-      setUser(found);
-      localStorage.setItem('labgold_active_user', JSON.stringify(found));
       return { success: true };
-    } catch (e) {
-      return { success: false, error: 'Erro ao efetuar login. Tente novamente.' };
+    } catch (e: any) {
+      return { success: false, error: e.message || 'Erro ao registrar.' };
     }
   };
 
-  const logout = () => {
-    setUser(null);
+  const loginUser = async (email: string, password?: string): Promise<LoginResult> => {
     try {
-      localStorage.removeItem('labgold_active_user');
-    } catch (e) {}
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: password || '',
+      });
+
+      if (error) {
+        return { success: false, error: 'E-mail ou senha incorretos.' };
+      }
+
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: 'Erro ao efetuar login.' };
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      }
+    });
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
@@ -122,8 +129,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         isLoggedIn: !!user,
+        loading,
         registerUser,
         loginUser,
+        loginWithGoogle,
         logout
       }}
     >
