@@ -19,6 +19,7 @@ interface AudioContextType {
   duration: number;
   volume: number;
   isMuted: boolean;
+  isLoading: boolean;
   playTrack: (item: PlayableItem) => void;
   togglePlay: () => void;
   pauseTrack: () => void;
@@ -38,14 +39,20 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [duration, setDuration] = useState<number>(0);
   const [volume, setVolumeState] = useState<number>(0.8);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Cache para os Blobs das músicas (evita baixar 2x a mesma)
+  const blobCache = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     // Create HTML5 Audio element on client side
     const audio = new Audio();
     audioRef.current = audio;
     audio.volume = volume;
+
+    // Impedir menu de contexto (Botão Direito) diretamente no elemento Audio (embora invisível)
+    audio.addEventListener('contextmenu', (e) => e.preventDefault());
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleLoadedMetadata = () => setDuration(audio.duration || 0);
@@ -63,7 +70,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  const playTrack = (item: PlayableItem) => {
+  const playTrack = async (item: PlayableItem) => {
     if (!audioRef.current) return;
 
     if (currentTrack?.id === item.id) {
@@ -77,9 +84,33 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     setCurrentTrack(item);
-    audioRef.current.src = item.audioUrl;
+    setIsLoading(true);
+
+    let secureUrl = item.audioUrl;
+
+    // Proteção de Áudio (Blob Fetching)
+    try {
+      if (blobCache.current.has(item.id)) {
+        secureUrl = blobCache.current.get(item.id)!;
+      } else {
+        // Baixa o arquivo em memória para ofuscar a URL real
+        const response = await fetch(item.audioUrl);
+        const blob = await response.blob();
+        secureUrl = URL.createObjectURL(blob);
+        blobCache.current.set(item.id, secureUrl);
+      }
+    } catch (e) {
+      console.error("Falha ao proteger stream do áudio, caindo para URL padrão", e);
+    }
+
+    audioRef.current.src = secureUrl;
     audioRef.current.currentTime = 0;
-    audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    audioRef.current.play().then(() => {
+      setIsPlaying(true);
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
+    });
   };
 
   const togglePlay = () => {
@@ -146,6 +177,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         duration,
         volume,
         isMuted,
+        isLoading,
         playTrack,
         togglePlay,
         pauseTrack,
