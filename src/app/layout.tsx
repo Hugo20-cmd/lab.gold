@@ -8,6 +8,7 @@ import { Footer } from '../components/layout/Footer';
 import { GlobalAudioPlayer } from '../components/player/GlobalAudioPlayer';
 import { CartDrawer } from '../components/cart/CartDrawer';
 import { BRAND_NAME, PRODUCER_NAME } from '../data/mockData';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   title: `${BRAND_NAME} | Beats, Samples & Produção Musical`,
@@ -52,6 +53,7 @@ export default function RootLayout({
             </CartProvider>
           </AudioProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
