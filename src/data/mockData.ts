@@ -166,6 +166,29 @@ export const MOCK_BEATS: Beat[] = [
     producer: PRODUCER_NAME,
     description: 'Instrumental oficial "TYPE RARE G (Sax Groove)". 100 BPM em E Minor. Arranjo sofisticado com groove de saxofone envolvente, graves profundos e timbres orgânicos produzidos por @originalpenna no Laboratório Gold.',
     waveform: [40, 60, 85, 90, 75, 80, 95, 100, 85, 75, 90, 80, 60, 95, 100, 90, 75, 60, 85, 90, 70, 50, 95, 100, 80, 60]
+  },
+  {
+    id: 'beat-afrobeat-93bpm',
+    title: 'AFROBEAT 93 BPM',
+    slug: 'afrobeat-93bpm',
+    genre: 'Afrobeat',
+    bpm: 93,
+    key: 'A Min',
+    coverUrl: '/covers/afrobeat-93bpm.png',
+    audioUrl: 'https://aqjppvztbspsxwesmcmk.supabase.co/storage/v1/object/public/beats%20+%20Starters/Beats/Afrobeat%20-%2093bpm%20-%20Aminor%20(Serum).wav',
+    tags: ['Afrobeat', '93 BPM', 'A Minor', 'Serum', 'Gold Series'],
+    priceBasic: 100.00,
+    priceStandard: 190.00,
+    priceProfessional: 450.00,
+    priceExclusive: 800.00,
+    isSoldExclusive: false,
+    status: 'available',
+    plays: 0,
+    releaseDate: '2026-09-11',
+    duration: '0:00',
+    producer: PRODUCER_NAME,
+    description: 'Instrumental Afrobeat a 93 BPM em A Minor. Criado com Serum no Laboratório Gold.',
+    waveform: [45, 65, 80, 95, 90, 85, 100, 90, 80, 75, 90, 85, 65, 95, 100, 85, 70, 60, 85, 90, 70, 55, 95, 90, 80, 65]
   }
 ];
 
